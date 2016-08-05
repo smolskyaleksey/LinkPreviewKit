@@ -18,6 +18,8 @@ static NSString *const LKHTMLElementTitle = @"title";
 static NSString *const LKHTMLAttributeContent = @"content";
 static NSString *const LKHTMLAttributeProperty = @"property";
 static NSString *const LKHTMLAttributeName = @"name";
+static NSString *const LKHTMLAttributeItem = @"itemprop";
+
 
 @interface LKLinkPreview (LKLinkPreviewHTMLReader)
 
@@ -50,7 +52,8 @@ static NSString *const LKHTMLAttributeName = @"name";
     if ([property hasPrefix:@"twitter:"]) {
         return LKTemplateKindTwitterCard;
     }
-    if ([property isEqualToString:@"description"]) {
+    if ([property isEqualToString:@"description"] || [property isEqualToString:@"name"] ||
+        [property isEqualToString:@"image"] || [property isEqualToString:@"title"]) {
         return LKTemplateKindStandard;
     }
     
@@ -87,14 +90,17 @@ static NSString *const LKHTMLAttributeName = @"name";
 {
     NSString *property = [element.attributes objectForKey:LKHTMLAttributeProperty];
     NSString *name = [element.attributes objectForKey:LKHTMLAttributeName];
+    NSString *item = [element.attributes objectForKey:LKHTMLAttributeItem];
     NSString *content = [element.attributes objectForKey:LKHTMLAttributeContent];
     NSString *key = nil;
     
     if (property.length > 0 && name.length == 0) {
         key = property;
     }
-    else {
+    else if (name.length > 0) {
         key = name;
+    } else {
+        key = item;
     }
     LKMetaKeyValuePair *pair = [LKMetaKeyValuePair new];
     pair.key = key;

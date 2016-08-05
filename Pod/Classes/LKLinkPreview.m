@@ -59,7 +59,7 @@ static NSString *LKNormalizedProperyName(NSString *property, LKTemplateKind kind
 {
     NSString *normalized = LKNormalizedProperyName(property, self.kind);
     
-    if ([normalized isEqualToString:@"title"]) {
+    if ([normalized isEqualToString:@"title"] || [normalized isEqualToString:@"name"]) {
         self.title = content;
     }
     else if ([normalized isEqualToString:@"type"]) {
@@ -75,7 +75,7 @@ static NSString *LKNormalizedProperyName(NSString *property, LKTemplateKind kind
     else if ([normalized isEqualToString:@"image"]) {
         self.imageURL = [NSURL URLWithString:content];
     }
-    else if ([normalized isEqualToString:@"site_name"]) {
+    else if ([normalized isEqualToString:@"site_name"] || [normalized isEqualToString:@"site"]) {
         self.siteName = content;
     }
     else if ([normalized isEqualToString:@"description"]) {
