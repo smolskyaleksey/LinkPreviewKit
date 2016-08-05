@@ -142,6 +142,13 @@ static NSString *const LKHTMLAttributeItem = @"itemprop";
     if (standardTemplatePreview) {
         HTMLElement *titleElement = [document nodesMatchingSelector:LKHTMLElementTitle].firstObject;
         standardTemplatePreview.title = titleElement.textContent;
+        BOOL hasImageURL = [[library.allPreviews valueForKey:@"imageURL"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF != nil"]].count > 0;
+        if (!hasImageURL) {
+            NSString *imageURL = [[[document nodesMatchingSelector:@"img"] lastObject] objectForKeyedSubscript:@"src"];
+            if (imageURL.length > 0) {
+                standardTemplatePreview.imageURL = [NSURL URLWithString:imageURL];   
+            }
+        }
     }
     
     if (handler) {

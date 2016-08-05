@@ -36,6 +36,7 @@ NSString *const LKLinkPreviewKitErrorDomain = @"LKLinkPreviewKitErrorDomain";
                 LKTemplateLibrary *library = [LKTemplateLibrary new];
                 LKLinkPreview *preview = [library fetchOrRegisterNewLinkPreviewByKind:LKTemplateKindStandard];
                 [preview setContent:finalResult.absoluteString forProperty:@"image"];
+                [preview setContent:finalResult forProperty:@"url"];
                 if (handler) {
                     dispatch_sync(dispatch_get_main_queue(), ^{
                         handler(@[preview], error);
@@ -51,6 +52,9 @@ NSString *const LKLinkPreviewKitErrorDomain = @"LKLinkPreviewKitErrorDomain";
                                                       contentTypeHeader:contentType];
                 LKLinkPreviewHTMLReader *htmlReader = [LKLinkPreviewHTMLReader new];
                 [htmlReader linkPreviewFromHTMLDocument:document completionHandler:^(NSArray *previews, NSError *error) {
+                    if (finalResult != nil) {
+                        [previews makeObjectsPerformSelector:@selector(setURL:) withObject:finalResult];
+                    }
                     if (handler) {
                         dispatch_sync(dispatch_get_main_queue(), ^{
                             handler(previews, error);
