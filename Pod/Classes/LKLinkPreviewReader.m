@@ -31,18 +31,19 @@ NSString *const LKLinkPreviewKitErrorDomain = @"LKLinkPreviewKitErrorDomain";
                 });
             }
         } else {
-            NSURL *finalResult = response.URL;
-            if (finalResult.absoluteString.isImage) {
+            NSString *responseURL = response.URL.absoluteString;
+            if (responseURL.isImage) {
                 LKTemplateLibrary *library = [LKTemplateLibrary new];
                 LKLinkPreview *preview = [library fetchOrRegisterNewLinkPreviewByKind:LKTemplateKindStandard];
-                [preview setContent:finalResult.absoluteString forProperty:@"image"];
-                [preview setContent:finalResult forProperty:@"url"];
+                [preview setContent:responseURL forProperty:@"image"];
+                [preview setContent:responseURL forProperty:@"url"];
                 if (handler) {
                     dispatch_sync(dispatch_get_main_queue(), ^{
                         handler(@[preview], error);
                     });
                 }
             } else {
+                NSURL *finalResult = response.URL;
                 NSString *contentType = nil;
                 if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
                     NSDictionary *headers = [(NSHTTPURLResponse *)response allHeaderFields];
