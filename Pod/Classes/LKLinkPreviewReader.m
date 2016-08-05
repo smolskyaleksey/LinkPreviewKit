@@ -12,7 +12,6 @@
 #import "LKLinkPreviewHTMLReader.h"
 #import <HTMLReader/HTMLReader.h>
 
-
 NSString *const LKLinkPreviewKitErrorDomain = @"LKLinkPreviewKitErrorDomain";
 
 
@@ -23,35 +22,30 @@ NSString *const LKLinkPreviewKitErrorDomain = @"LKLinkPreviewKitErrorDomain";
 {
     NSURLSession *session = [NSURLSession sharedSession];
     [[session dataTaskWithURL:URL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        NSInteger statusCode = 404;
-        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-            statusCode = [(NSHTTPURLResponse *)response statusCode];
-        }
-        if (error || statusCode != 200) {
-            if (statusCode != 200 && error == nil) {
-                error = [NSError errorWithDomain:LKLinkPreviewKitErrorDomain code:LKLinkPreviewKitErrorBadURL userInfo:nil];
-            }
+        if (error != nil) {
             if (handler) {
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     handler(nil, error);
                 });
             }
-            return;
+        } else {
+            NSURL *finalResult = response.URL;
+            NSString *contentType = nil;
+            if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+                NSDictionary *headers = [(NSHTTPURLResponse *)response allHeaderFields];
+                contentType = headers[@"Content-Type"];
+            }
+            HTMLDocument *document = [HTMLDocument documentWithData:data
+                                                  contentTypeHeader:contentType];
+            LKLinkPreviewHTMLReader *htmlReader = [LKLinkPreviewHTMLReader new];
+            [htmlReader linkPreviewFromHTMLDocument:document completionHandler:^(NSArray *previews, NSError *error) {
+                if (handler) {
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        handler(previews, error);
+                    });
+                }
+            }];
         }
-        
-        NSString *contentType = nil;
-        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-            NSDictionary *headers = [(NSHTTPURLResponse *)response allHeaderFields];
-            contentType = headers[@"Content-Type"];
-        }
-        HTMLDocument *document = [HTMLDocument documentWithData:data
-                                              contentTypeHeader:contentType];
-        LKLinkPreviewHTMLReader *htmlReader = [LKLinkPreviewHTMLReader new];
-        [htmlReader linkPreviewFromHTMLDocument:document completionHandler:^(NSArray *previews, NSError *error) {
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                handler(previews, error);
-            });
-        }];
     }] resume];
 }
 
